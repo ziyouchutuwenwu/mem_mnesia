@@ -9,21 +9,23 @@ start_link(BehaviorModule) ->
 	supervisor:start_link(?MODULE, {BehaviorModule}).
 
 init({BehaviorModule}) ->
-	RestartStrategy = one_for_one,
-	MaxRestarts = 1000,
-	MaxSecondsBetweenRestarts = 3600,
+  MaxRestarts = 1000,
+  MaxSecondsBetweenRestarts = 3600,
 
-	SupFlags = {RestartStrategy, MaxRestarts, MaxSecondsBetweenRestarts},
+  SupervisorFlags = #{
+    strategy => one_for_one,
+    intensity => MaxRestarts,
+    period => MaxSecondsBetweenRestarts
+  },
 
-	Restart = permanent,
-	Shutdown = 2000,
-	Type = worker,
+  ChildSpec = #{
+    id => mem_mnesia_monitor,
+    start => {mem_mnesia_monitor, start_link, [{BehaviorModule}]},
+    restart => permanent,
+    shutdown => 2000,
+    type => worker,
+    modules => [mem_mnesia_monitor]
+  },
 
-	Child = {
-		mem_mnesia_monitor,
-		{mem_mnesia_monitor, start_link, [{BehaviorModule}]},
-		Restart, Shutdown, Type,
-		[mem_mnesia_monitor]
-	},
-
-	{ok, {SupFlags, [Child]}}.
+  Children = [ChildSpec],
+  {ok, {SupervisorFlags, Children}}.
