@@ -1,4 +1,4 @@
--module(my_mnesia_test).
+-module(mnesia_demo).
 
 -record(
 	person, {
@@ -7,7 +7,8 @@
 		age
 }).
 
--compile(export_all).
+-export([init/0, create_table/0]).
+-export([write/0, delete_table/1]).
 
 init()->
 	application:start(mem_mnesia).
